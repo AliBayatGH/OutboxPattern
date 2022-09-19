@@ -22,6 +22,27 @@ builder.Services.AddDbContext<OrderingDbContext>((sp, optionsBuilder) =>
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddHostedService<ProccessOutboxMessageBackgroundService>();
 
+builder.Services.AddCap(x =>
+{
+    x.UseSqlServer(options => {
+        //SqlServerOptions
+        options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        options.Schema = "cap";
+    });
+    //x.UseRabbitMQ("localhost:15672");
+    x.UseRabbitMQ(o =>
+    {
+        o.HostName = "localhost";
+        o.ConnectionFactoryOptions = options =>
+        {
+            //options.Port = 15672;
+            options.UserName = "guest";
+            options.Password = "guest";
+        };
+    });
+
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

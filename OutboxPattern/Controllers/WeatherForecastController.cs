@@ -1,3 +1,4 @@
+using DotNetCore.CAP;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OutboxPattern.Application.Commands;
@@ -21,6 +22,21 @@ namespace OutboxPattern.Controllers
             await _mediator.Send(commend);
 
             return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult SendMessage([FromServices] ICapPublisher capBus)
+        {
+            capBus.Publish("test.show.time", DateTime.Now);
+
+            return Ok();
+        }
+
+        [NonAction]
+        [CapSubscribe("test.show.time")]
+        public void ReceiveMessage(DateTime time)
+        {
+            Console.WriteLine("message time is:" + time);
         }
     }
 }
